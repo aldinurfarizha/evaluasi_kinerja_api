@@ -11,7 +11,7 @@ class DbOperation
         $this->con = $db->connect();
 	}
 
-	function getSales(){
+	function getSales2(){
 		$stmt = $this->con->prepare("SELECT * FROM data_sales");
 		$stmt->execute();
 		$stmt->bind_result($nik_sales, $nama_sales, $area_penempatan, $tanggal_masuk, $tanggal_keluar, $alamat, $ktp, $sim,	$tanggal_lahir, $no_hp, $keterangan, $pas_foto);
@@ -36,6 +36,39 @@ class DbOperation
 			array_push($data_sales, $sales); 
 		}
 		return $data_sales; 
+	}
+
+	function getSales(){
+		$stmt = $this->con->prepare("SELECT nik_sales,nama_sales,(SELECT SUM(bobot_kriteria) as normalisasi from data_kriteria GROUP BY nik_sales) from data_sales");
+		$stmt->execute();
+		$stmt->bind_result($nik_sales, $nama_sales, $normalisasi);
+		
+		$data_sales = array(); 
+		
+		while($stmt->fetch()){
+			$sales  = array();
+			$sales['nik_sales'] = $nik_sales; 
+			$sales['nama_sales'] = $nama_sales; 
+			$sales['normalisasi'] = $normalisasi; 
+			
+
+			array_push($data_sales, $sales); 
+		}
+		return $data_sales; 
+	}
+
+	function get_bobot(){
+		$stmt = $this->con->prepare("SELECT bobot_kriteria from data_kriteria");
+		$stmt->execute();
+		$stmt->bind_result($bobot_kriteria);
+		$bobot= array(); 
+		
+		while($stmt->fetch()){
+			$sales  = array();
+			$sales['bobot_kriteria'] = $bobot_kriteria; 
+			array_push($bobot, $sales); 
+		}
+		return $bobot; 
 	}
 
 	function getKriteria(){
@@ -74,6 +107,27 @@ class DbOperation
 			array_push($data_nilai, $nilai); 
 		}	
 		return $data_nilai; 
+	}
+
+	function getnormalisasi(){
+		$stmt = $this->con->prepare("SELECT sum(bobot_kriteria) as normalisasi from data_kriteria");
+		$stmt->execute();
+		$stmt->bind_result($normalisasisum);
+		
+		$data_normalisasi = array(); 
+		
+		while($stmt->fetch()){
+			$normalisasi  = array();
+			$normalisasi['normalisasi'] = $normalisasisum; 
+
+			array_push($data_normalisasi, $normalisasi); 
+		}	
+		return $data_normalisasi; 
+	}
+
+	function insert_nilai(){
+		
+		
 	}
 
 	//contoh 
